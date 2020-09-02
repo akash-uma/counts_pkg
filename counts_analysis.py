@@ -1,7 +1,7 @@
 import numpy as np
-import ar_model as ar
+import counts_pkg.ar_model as ar
 import nb_classifier.bayes_classifier as nb
-import cos_tuning as ct
+import counts_pkg.cos_tuning as ct
 
 class counts_analysis:
     
