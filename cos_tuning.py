@@ -19,6 +19,8 @@ class cos_tuning:
         
         bl = betas[0]
         PD = np.arctan2(betas[2],betas[1])
+        if PD<0:
+            PD = PD + 2*np.pi
         mod_val = betas[1] / np.cos(PD)
         mod_depth = mod_val/bl
         self.params = {
