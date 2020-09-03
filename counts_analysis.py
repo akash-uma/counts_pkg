@@ -167,7 +167,7 @@ class counts_analysis:
             X_data = X_data - X_auto
         
         mdl = nb.bayes_classifier(dist_type=dist_type)
-        _,acc = mdl.crossvalidate(self.X,self.y,n_folds=n_folds,rand_seed=rand_seed,verbose=False)
+        preds,acc = mdl.crossvalidate(self.X,self.y,n_folds=n_folds,rand_seed=rand_seed,verbose=False)
         
-        return acc
+        return acc, preds
     
