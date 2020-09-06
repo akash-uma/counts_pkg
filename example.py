@@ -55,9 +55,9 @@ plt.plot(x,x,'k--')
 plt.show()
 
 # check that autoregression is properly computed
-ar_proc = sc_obj.compute_autoreg(order=50,both_dirs=True)
-no_ar = sc_obj.rm_autoreg(order=50,both_dirs=True)
-ar_var = sc_obj.get_auto_varexp(return_each=True,order=50,both_dirs=True)
+ar_proc = sc_obj.compute_autoreg(order=25,both_dirs=True)
+no_ar = sc_obj.rm_autoreg(order=25,both_dirs=True)
+ar_var = sc_obj.get_auto_varexp(return_each=True,order=25,both_dirs=True)
 plt.figure(4)
 for i in range(dat['spike_counts'].shape[1]):
     plt.subplot(1,2,1)
@@ -76,8 +76,8 @@ for i in range(dat['spike_counts'].shape[1]):
         break
         
 # check decoding accuracy (with and without removing autoreg)
-acc = sc_obj.decode(rm_auto=False,rand_seed=0) * 100
-acc_rmauto = sc_obj.decode(rm_auto=True,rand_seed=0) * 100
+acc,_ = sc_obj.decode(rm_auto=False,rand_seed=0)
+acc_rmauto,_ = sc_obj.decode(rm_auto=True,rand_seed=0)
 chance_lvl = 1/sc_obj.n_lbls * 100
 print('Decoding:\n   chance {:.2f}%\n   original {:.2f}%\n   no auto {:.2f}%\n'.format(chance_lvl,acc,acc_rmauto))
 
