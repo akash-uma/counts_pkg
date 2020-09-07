@@ -70,6 +70,8 @@ class counts_analysis:
         
     
     def compute_autoreg(self,order=25,both_dirs=True,auto_type='ar'):
+        if order<=0:
+            return np.zeros(self.X.shape)
         # compute autoregressive predictions for each neuron
         # first remove condition means
         X_nomean = self.rm_cond_means()
@@ -87,17 +89,21 @@ class counts_analysis:
         
     
     def rm_autoreg(self,order=25,both_dirs=True,fa_remove=False,auto_type='ar'):
-        # remove autoregressive (i.e. slow) processes
-        tmp = self.compute_autoreg(order=order,both_dirs=both_dirs,auto_type=auto_type)
-        if fa_remove:
-            fa_mdl = fa.factor_analysis(model_type='fa')
-            fa_mdl.train(tmp,zDim=np.minimum(15,self.D-1))
-            z,LL = fa_mdl.estep(tmp)
-            ar_est = z['z_mu'].dot(fa_mdl.get_params()['L'].T)
-        else:
-            ar_est = tmp
-            
         X_nomean = self.rm_cond_means()
+        if order<=0:
+            ar_est = np.zeros(X_nomean.shape)
+        else:
+            # remove autoregressive (i.e. slow) processes
+            tmp = self.compute_autoreg(order=order,both_dirs=both_dirs,auto_type=auto_type)
+            if fa_remove:
+                fa_mdl = fa.factor_analysis(model_type='fa')
+                fa_mdl.train(tmp,zDim=np.minimum(15,self.D-1))
+                z,LL = fa_mdl.estep(tmp)
+                ar_est = z['z_mu'].dot(fa_mdl.get_params()['L'].T)
+            else:
+                ar_est = tmp
+            
+        
         return X_nomean-ar_est,ar_est
         
     
@@ -177,10 +183,10 @@ class counts_analysis:
         return sig_corr
     
     
-    def decode(self,dist_type='shared_diag',n_folds=10,rm_auto=False,auto_order=25,auto_both_dirs=True,rand_seed=None):
+    def decode(self,dist_type='shared_diag',n_folds=10,rm_auto=False,auto_order=25,auto_both_dirs=True,auto_type='ar',rand_seed=None):
         X_data = self.X - np.mean(self.X,axis=0)
         if rm_auto:
-            X_auto = self.compute_autoreg(order=auto_order,both_dirs=auto_both_dirs)
+            X_auto = self.compute_autoreg(order=auto_order,both_dirs=auto_both_dirs,auto_type=auto_type)
             X_data = X_data - X_auto
         
         mdl = nb.bayes_classifier(dist_type=dist_type)
