@@ -2,6 +2,7 @@ import numpy as np
 import counts_pkg.ar_model as ar
 import nb_classifier.bayes_classifier as nb
 import counts_pkg.cos_tuning as ct
+import fa.factor_analysis as fa
 
 class counts_analysis:
     
@@ -13,6 +14,10 @@ class counts_analysis:
         self.lbls = np.unique(self.y)
         self.n_lbls = len(self.lbls)
         self.bin_size = np.array(bin_size) # in seconds
+
+
+    def __runningMean(self,x, N):
+        return np.convolve(x, np.ones((N,))/N,mode='same')
 
 
     def compute_avg_fr(self):
@@ -64,29 +69,41 @@ class counts_analysis:
             return fano
         
     
-    def compute_autoreg(self,order=25,both_dirs=True):
+    def compute_autoreg(self,order=25,both_dirs=True,auto_type='ar'):
         # compute autoregressive predictions for each neuron
         # first remove condition means
         X_nomean = self.rm_cond_means()
-        # fit ar model for each neuron
-        a = ar.ar_model(n_lags=order,both_dirs=both_dirs)
-        X_auto = np.zeros(X_nomean.shape)
-        for i in range(self.D):
-            X_auto[:,i] = a.fit(X_nomean[:,i].flatten())
+        if auto_type.lower()=='ar':
+            # fit ar model for each neuron
+            a = ar.ar_model(n_lags=order,both_dirs=both_dirs)
+            X_auto = np.zeros(X_nomean.shape)
+            for i in range(self.D):
+                X_auto[:,i] = a.fit(X_nomean[:,i].flatten())
+        elif auto_type.lower()=='mean':
+            X_auto = np.zeros(X_nomean.shape)
+            for i in range(self.D):
+                X_auto[:,i] = self.__runningMean(X_nomean[:,i],order)
         return X_auto
         
     
-    def rm_autoreg(self,order=25,both_dirs=True):
+    def rm_autoreg(self,order=25,both_dirs=True,fa_remove=False,auto_type='ar'):
         # remove autoregressive (i.e. slow) processes
-        tmp = self.compute_autoreg(order=order,both_dirs=both_dirs)
-        
+        tmp = self.compute_autoreg(order=order,both_dirs=both_dirs,auto_type=auto_type)
+        if fa_remove:
+            fa_mdl = fa.factor_analysis(model_type='fa')
+            fa_mdl.train(tmp,zDim=np.minimum(15,self.D-1))
+            z,LL = fa_mdl.estep(tmp)
+            ar_est = z['z_mu'].dot(fa_mdl.get_params()['L'].T)
+        else:
+            ar_est = tmp
+            
         X_nomean = self.rm_cond_means()
-        return X_nomean - tmp
+        return X_nomean-ar_est,ar_est
         
     
-    def get_auto_varexp(self,return_each=False,order=25,both_dirs=True):
+    def get_auto_varexp(self,return_each=False,order=25,both_dirs=True,auto_type='ar'):
         # percent of variability explained by conditions
-        X_auto = self.compute_autoreg(order=order,both_dirs=both_dirs)
+        X_auto = self.compute_autoreg(order=order,both_dirs=both_dirs,auto_type=auto_type)
         auto_var = np.var(X_auto,axis=0)
         total_var = np.var(self.X,axis=0)
         perc_auto_var = auto_var / total_var * 100
