@@ -55,8 +55,8 @@ plt.plot(x,x,'k--')
 plt.show()
 
 # check that autoregression is properly computed
-no_ar,ar_proc = sc_obj.rm_autoreg(order=0,both_dirs=True,auto_type='mean',fa_remove=True)
-ar_var = sc_obj.get_auto_varexp(return_each=True,order=0,both_dirs=True,auto_type='mean')
+no_ar,ar_proc = sc_obj.rm_autoreg(order=25,both_dirs=True,auto_type='mean',fa_remove=True,fa_dims=5)
+ar_var = sc_obj.get_auto_varexp(return_each=True,order=25,both_dirs=True,auto_type='mean')
 plt.figure(4)
 for i in range(dat['spike_counts'].shape[1]):
     plt.subplot(1,2,1)

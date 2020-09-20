@@ -88,7 +88,7 @@ class counts_analysis:
         return X_auto
         
     
-    def rm_autoreg(self,order=25,both_dirs=True,fa_remove=False,auto_type='ar'):
+    def rm_autoreg(self,order=25,both_dirs=True,fa_remove=False,fa_dims=15,auto_type='ar'):
         X_nomean = self.rm_cond_means()
         if order<=0:
             ar_est = np.zeros(X_nomean.shape)
@@ -97,7 +97,7 @@ class counts_analysis:
             tmp = self.compute_autoreg(order=order,both_dirs=both_dirs,auto_type=auto_type)
             if fa_remove:
                 fa_mdl = fa.factor_analysis(model_type='fa')
-                fa_mdl.train(tmp,zDim=np.minimum(15,self.D-1))
+                fa_mdl.train(tmp,zDim=np.minimum(fa_dims,self.D-1))
                 z,LL = fa_mdl.estep(tmp)
                 ar_est = z['z_mu'].dot(fa_mdl.get_params()['L'].T)
             else:
