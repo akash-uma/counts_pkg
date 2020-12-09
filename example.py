@@ -3,7 +3,7 @@ import scipy.io as sio
 import counts_analysis as ca
 import matplotlib.pyplot as plt
 
-dat = sio.loadmat('sample_dat.mat')
+dat = sio.loadmat('sample_dat.mat') # dat['spike_counts'] is matrix that is # of trials x # of neurons
 
 sc_obj = ca.counts_analysis(dat['spike_counts'],dat['targ_angs'].flatten(),dat['bin_size'])
 
@@ -37,6 +37,8 @@ for i in range(dat['spike_counts'].shape[1]):
 # check that condition means are properly removed
 X_nomean = sc_obj.rm_cond_means()
 cond_var = sc_obj.get_cond_varexp(return_each=True)
+print('On average, conditions explain {:.2f}% var'.format(sc_obj.get_cond_varexp()))
+print('   Max: {:.2f}%\n   Min: {:.2f}%'.format(np.max(cond_var),np.min(cond_var)))
 plt.figure(2)
 plt.plot(sc_obj.X[:,0])
 plt.plot(X_nomean[:,0] + avg_fr[0])
@@ -52,10 +54,12 @@ plt.figure(3)
 plt.plot(sc_mean,sc_var,'bo')
 x=np.array([0,np.max(np.concatenate((sc_mean,sc_var)))])
 plt.plot(x,x,'k--')
+plt.xlabel('mean spike count')
+plt.ylabel('var spike count')
 plt.show()
 
 # check that autoregression is properly computed
-no_ar,ar_proc = sc_obj.rm_autoreg(order=25,both_dirs=True,auto_type='mean',fa_remove=True,fa_dims=5)
+no_ar,ar_proc = sc_obj.rm_autoreg(order=25,both_dirs=True,auto_type='mean',fa_remove=True,fa_dims=10)
 ar_var = sc_obj.get_auto_varexp(return_each=True,order=25,both_dirs=True,auto_type='mean')
 plt.figure(4)
 for i in range(dat['spike_counts'].shape[1]):
