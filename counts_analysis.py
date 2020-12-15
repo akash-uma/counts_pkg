@@ -32,6 +32,15 @@ class counts_analysis:
             cond_mean[i,:] = np.mean(self.X[idx,:],axis=0).flatten()
         return cond_mean
 
+
+    def compute_cond_vars(self):
+        # compute variances of each condition
+        cond_vars = np.zeros((self.n_lbls,self.D))
+        for i,tmp in enumerate(self.lbls):
+            idx = self.y==tmp
+            cond_vars[i,:] = np.var(self.X[idx,:],axis=0).flatten()
+        return cond_vars
+    
         
     def rm_cond_means(self):        
         # remove condition means from data        

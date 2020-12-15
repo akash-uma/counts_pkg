@@ -18,10 +18,12 @@ plt.show()
 
 # check that condition means and tuning curves are properly computed
 cond_means = sc_obj.compute_cond_means()
+cond_vars = sc_obj.compute_cond_vars()
 tune_params,tune_pred,ang_pred = sc_obj.fit_cosine_tuning(compute_p=True,rand_seed=0)
 plt.figure(1)
 for i in range(dat['spike_counts'].shape[1]):
     plt.plot(sc_obj.lbls,cond_means[:,i],marker='o',ls='None')
+    plt.plot(sc_obj.lbls,cond_vars[:,i],marker='o',ls='None',color='b')
     plt.plot(ang_pred,tune_pred[:,i],marker='None',ls='-',color='r')
     plt.xticks(ticks=sc_obj.lbls)
     plt.xlabel('target angle')
