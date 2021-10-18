@@ -17,7 +17,7 @@ class counts_analysis:
 
 
     def __runningMean(self,x, N):
-        return np.convolve(x, np.ones((N,))/N,mode='valid')
+        return np.convolve(x, np.ones((N,))/N,mode='same')
 
 
     def compute_avg_fr(self):
